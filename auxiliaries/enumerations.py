@@ -12,3 +12,8 @@ class Order_Type(Enum):
     LIMIT_ORDER = "LIMIT_ORDER"
     STOP_ORDER = "STOP_ORDER"
     BUY_STOP_ORDER = "BUY_STOP_ORDER"
+
+
+class Financial_Instrument(Enum):
+    EQUITY = "EQUITY"
+    OPTION = "OPTION"

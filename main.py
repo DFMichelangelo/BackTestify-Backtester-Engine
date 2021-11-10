@@ -8,17 +8,26 @@ from logger import Logger
 from logger.std_logger import init_std_logger
 import globals
 
+
 def init():
-    
+    # ? Initialize global variables
     globals.init_globals()
+
+    # ? Set configuration file as global variable    
     with open('./configuration.json') as config_file:
         globals.config = json.load(config_file)
-    if globals.config['system']['environment']=="Development"
+    
+    # ? Use rich logger for errors in development
+    if globals.config['system']['environment'] == "Development":
         install()
+    
+    # ? Create file logger
     init_std_logger("logfile.log")
-    logger = Logger("Main", "green")
 
+    # ? Create logger
+    logger = Logger("Main", "green")
     logger.info("Starting main")
+    
     # ? Select Strategy
     strategy = RSI_strategy(
         globals.config["indicators_parameters"])
@@ -28,13 +37,13 @@ def init():
         globals.config["start_date"],
         globals.config["end_date"]
     )
-    1/0
     # ? Create Portfolio
     portfolio = Portfolio(
         initial_value=globals.config["initial_portfolio_value"],
-        startingDate=globals.config["start_date"],
+        starting_date=globals.config["start_date"],
         strategy=strategy
     )
+    
     # ? Backtest
     portfolio = backtester.backtest_strategy(
         portfolio,
