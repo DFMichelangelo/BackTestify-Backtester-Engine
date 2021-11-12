@@ -22,7 +22,7 @@ def backtest_strategy(portfolio, strategy, financial_data):
         for date_index in range(amount_of_data_for_strategy_from_today, amount_of_financial_data):
             data_input_for_strategy = financial_data[(
                 date_index-amount_of_data_for_strategy_from_today):date_index]
-            today_price = financial_data.iloc[date_index, 1:]
+            today_price = financial_data.iloc[date_index, 1:]["Adj Close"]
             today_date = financial_data.index[date_index]
             progress.update(backtesting_task, advance=progress_advance)
 
@@ -48,9 +48,8 @@ def backtest_strategy(portfolio, strategy, financial_data):
                 portfolio.add_order(
                     creation_price=today_price,
                     creation_date=today_date,
-                    position=position
+                    order_type=position
                 )
-#
 #        # ? 5) check if the order is the same of the signal
 #        # elif isOrderOfThisType(ordersOpen, orderType)):
 #                # pass

@@ -1,3 +1,2 @@
-def init_globals():
-    global configuration
-    configuration = None
+global configuration
+configuration = None

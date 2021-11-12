@@ -11,41 +11,42 @@ import globals
 
 def init():
     # ? Initialize global variables
-    globals.init_globals()
+    # globals.init_globals()
 
-    # ? Set configuration file as global variable    
+    # ? Set configuration file as global variable
     with open('./configuration.json') as config_file:
-        globals.config = json.load(config_file)
-    
+        globals.configuration = json.load(config_file)
+
     # ? Use rich logger for errors in development
-    if globals.config['system']['environment'] == "Development":
+    if globals.configuration['system']['environment'] == "Development":
         install()
-    
+    print(globals.configuration['system']['environment'])
     # ? Create file logger
     init_std_logger("logfile.log")
 
     # ? Create logger
     logger = Logger("Main", "green")
     logger.info("Starting main")
-    
+
     # ? Select Strategy
     strategy = RSI_strategy(
-        globals.config["indicators_parameters"])
+        globals.configuration["indicators_parameters"])
     # ? Download Data
     financial_data = download_financial_data(
-        globals.config["financial_instrument_name"],
-        globals.config["start_date"],
-        globals.config["end_date"]
+        globals.configuration["financial_instrument_name"],
+        globals.configuration["start_date"],
+        globals.configuration["end_date"]
     )
     # ? Create Portfolio
+    global portfolio
     portfolio = Portfolio(
-        initial_value=globals.config["initial_portfolio_value"],
-        starting_date=globals.config["start_date"],
+        initial_value=globals.configuration["initial_portfolio_value"],
+        starting_date=globals.configuration["start_date"],
         strategy=strategy
     )
-    
+
     # ? Backtest
-    portfolio = backtester.backtest_strategy(
+    backtester.backtest_strategy(
         portfolio,
         strategy,
         financial_data
