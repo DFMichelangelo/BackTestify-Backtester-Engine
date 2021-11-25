@@ -18,7 +18,7 @@
 		"overnight": "5"
 	},
 	"system": {
-		"log_level": "DEBUG",
+		"log_level": "INFO",
 		"environment": "Development"
 	}
 }
