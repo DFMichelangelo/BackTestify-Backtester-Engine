@@ -1,7 +1,6 @@
 import pandas as pd
-import numpy as np
 import uuid
-from auxiliaries.enumerations import Order_Status
+from auxiliaries.enumerations import Order_Status, Position
 
 
 class Portfolio:
@@ -15,7 +14,7 @@ class Portfolio:
             #               "financial_instrument_type": [],
             "creation_date": [],
             "creation_price": [],
-            "order_type": [],
+            "position": [],
             "status": [],
             "open_price": [],
             "open_date": [],
@@ -28,7 +27,7 @@ class Portfolio:
             # "open_order_commission":[],
             # "closed_order_commission":[],
             # "other_order_commission":[],
-            # "PnL":[],
+            "pnl": [],
             # "value":[],
             # trail_stop_loss_amount:[],
             # trail_stop_loss_percentage:[],
@@ -44,37 +43,64 @@ class Portfolio:
         print("TO BE DONE")
         pass
 
-    def add_order(self, creation_price, creation_date, order_type):
-        order = self.create_order(creation_price, creation_date, order_type)
-        self.orders = self.orders.append(order, ignore_index=True)
+    def add_order(self, order):
+        #self.orders = self.orders.append(order, ignore_index=True)
+        self.orders.loc[len(self.orders)+1] = order
 
-    def close_order(self, order_index, price, date):
+    def close_order(self, open_order, price, date):
+        order = self.orders[self.orders["ID"] == open_order["ID"]]
+        order["status"] = Order_Status.CLOSED
+        order["close_date"] = date
+        order["close_price"] = price
+        if order["position"] == Position.LONG:
+            order["pnl"] = order["size"] * (price-order["open_price"])
+        elif order["position"] == Position.SHORT:
+            order["pnl"] = order["size"] * ((order["open_price"]-price))
+        self.orders[self.orders["ID"] == open_order["ID"]] = order
+
+        porfolio_value_before_order_close = self.value()
+        portfolio_value = porfolio_value_before_order_close+order["pnl"]
+        self.value_history.append(
+            {
+                "date": date,
+                "value": portfolio_value
+            })
+
+    def check_for_orders_to_close(self, today_price, today_date):
         print("TO BE DONE")
         pass
 
-    def check_for_open_orders(self, order_type):
-        print("TO BE DONE check_for_open_orders")
-        return None
+    def check_for_open_orders(self, position):
+        return self.orders[self.orders["position"] == position]
 
-    def create_order(self, creation_price, creation_date, order_type):
+    def create_order(self, creation_price, creation_date, position):
+        tp_perc = 1.02 if position == Position.LONG else 0.98
+        sl_perc = 0.98 if position == Position.LONG else 1.02
+
         order = {
             "ID": uuid.uuid4(),
             "creation_date": creation_date,
             "creation_price": creation_price,
             "status": Order_Status.SUBMITTED,
-            "order_type": order_type,
+            "position": position,
+            # "order_type": order_type,
             "open_price": None,
             "open_date": None,
             "close_price": None,
             "close_date": None,
-            "take_profit_price": creation_price*1.02,
-            "stop_loss_price": creation_price*0.98,
+            "take_profit_price": creation_price*tp_perc,
+            "stop_loss_price": creation_price*sl_perc,
             "size": 1,
         }
         portfolio_new_value_history = {
             "date": creation_date,
             "value": self.value()-creation_price
         }
-        self.value_history = self.value_history.append(
-            portfolio_new_value_history, ignore_index=True)
+
+        self.add_order(order)
+        self.value_history.loc[len(
+            self.value_history)+1] = portfolio_new_value_history
+        # self.value_history = self.value_history.append(
+        #    portfolio_new_value_history, ignore_index=True)
+
         return order
