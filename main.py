@@ -28,7 +28,7 @@ logger.info("Starting Main")
 logger.info("Environment: " +
             globals.configuration['system']['environment'])
 '''
-server = FastAPI()
+app = FastAPI()
 
 
 class Item(BaseModel):
@@ -38,7 +38,7 @@ class Item(BaseModel):
     tax: Optional[float] = None
 
 
-@server.get("/")
+@app.get("/")
 def echo():
     return {"Hello": "World"}
 
@@ -57,7 +57,7 @@ class backtest_strategy_model(BaseModel):
     indicators_parameters: list
 
 
-@server.post("/backtest_strategy")
+@app.post("/backtest_strategy")
 def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
     # def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
     return backtest_strategy_data

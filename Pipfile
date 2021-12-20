@@ -11,6 +11,7 @@ pandas-datareader = "*"
 requests-cache = "*"
 plotly = "==5.4.0"
 fastapi = {extras = ["all"], version = "*"}
+gunicorn = "*"
 
 [dev-packages]
 autopep8 = "*"
@@ -19,6 +20,4 @@ autopep8 = "*"
 python_version = "3.9"
 
 [scripts]
-
 start = "uvicorn main:server --reload"
-
