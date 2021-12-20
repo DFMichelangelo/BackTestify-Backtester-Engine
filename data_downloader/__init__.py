@@ -1,8 +1,6 @@
 import pandas_datareader.data as web
-import pandas as pd
 import datetime as dt
 import requests_cache
-import datetime as dt
 from logger import Logger
 
 expire_after = dt.timedelta(days=3)
@@ -25,6 +23,6 @@ def download_financial_data(financial_instrument_name, start_date, end_date, tim
     )
     df.reset_index(inplace=True, drop=False)
     df["Date"] = df["Date"].dt.strftime("%d/%m/%Y %H:%M:%S")
-    logger.info(f"Downloaded Financial Data: {financial_instrument_name}")
-    logger.info(df.head())
+    logger.info(
+        f"Downloaded Financial Data: {financial_instrument_name} from {start_date} to {end_date}")
     return df
