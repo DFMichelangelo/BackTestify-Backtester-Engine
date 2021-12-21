@@ -6,12 +6,14 @@ name = "pypi"
 [packages]
 pandas = "*"
 numpy = "*"
-rich = "*"
 pandas-datareader = "*"
 requests-cache = "*"
 plotly = "==5.4.0"
 fastapi = {extras = ["all"], version = "*"}
 gunicorn = "*"
+rich = "*"
+colorama = "*"
+termcolor = "*"
 
 [dev-packages]
 autopep8 = "*"
@@ -20,4 +22,4 @@ autopep8 = "*"
 python_version = "3.9"
 
 [scripts]
-start = "uvicorn main:server --reload"
+start = "uvicorn main:app --reload"

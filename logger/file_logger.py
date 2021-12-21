@@ -1,16 +1,17 @@
 import logging
-import globals
-file_logger = logging.getLogger("file")
-file_handler = logging.FileHandler("./logs/logfile.log")
-file_handler.setLevel(globals.configuration["system"]["log_level"])
-#sh = logging.StreamHandler(sys.stdout)
-#se = logging.StreamHandler(sys.stderr)
-formatter = logging.Formatter(
+
+# INFO - Create formatter
+fh_formatter = logging.Formatter(
     "%(asctime)s: %(levelname)s - %(message)s (Path: %(pathname)s - Function: %(funcName)s")
-file_handler.setFormatter(formatter)
-# sh.setFormatter(formatter)
-# se.setFormatter(formatter)
-file_logger.addHandler(file_handler)
-# file_logger.addHandler(sh)
-# file_logger.addHandler(se)
-file_logger.propagate = False
+
+# INFO - Create file logger and set level to debug
+file_logger = logging.getLogger("file_logger")
+file_logger.setLevel(logging.DEBUG)
+
+# INFO - Create file handler and set level to debug
+fh = logging.FileHandler("./logs/logfile.log")
+fh.setLevel(logging.DEBUG)
+
+# INFO - add formatter to fh
+fh.setFormatter(fh_formatter)
+file_logger.addHandler(fh)

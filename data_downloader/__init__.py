@@ -8,7 +8,7 @@ expire_after = dt.timedelta(days=3)
 session = requests_cache.CachedSession(
     cache_name='financial_data_cache', backend='sqlite', expire_after=expire_after)
 
-logger = Logger("Data Downloader", "#F85E00")
+logger = Logger("Data Downloader", "magenta")
 
 
 def download_financial_data(financial_instrument_name, start_date, end_date, timeframe, provider):

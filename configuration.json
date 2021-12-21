@@ -1,26 +1,9 @@
 {
-	"initial_portfolio_value": 10000,
 	"percentage_of_portfolio_for_each_investment": 0.1,
-	"start_date": "01/1/2019",
-	"end_date": "01/02/2020",
-	"input_data": {
-		"provider": "yahoo",
-		"timeframe": "1d",
-		"financial_instrument_name": "AAPL"
-	},
-	"indicators_parameters": [
-		8,
-		30,
-		70
-	],
 	"commissions": {
 		"type": "fixed",
 		"long": "10",
 		"short": "10",
 		"overnight": "5"
-	},
-	"system": {
-		"log_level": "DEBUG",
-		"environment": "Development"
 	}
 }

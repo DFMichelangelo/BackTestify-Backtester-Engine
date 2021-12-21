@@ -1,12 +1,23 @@
 import logging
+import uvicorn
 from rich.logging import RichHandler
-import globals
-FORMAT = "%(message)s"
+FORMAT: str = "%(levelprefix)s %(asctime)s | %(message)s"
 
-#console_logger = logging.getLogger("console")
-#log_level = "DEBUG" if globals.configuration['system']['environment'] == "Development" else "INFO"
-logging.basicConfig(format=FORMAT, level="INFO",
-                    datefmt="[%X]", handlers=[RichHandler()])
-# console_logger.setLevel(globals.configuration["system"]["log_level"])
-console_logger = logging.getLogger("rich")
-console_logger.setLevel(globals.configuration["system"]["log_level"])
+# INFO - Create formatter
+ch_formatter = uvicorn.logging.DefaultFormatter(
+    FORMAT, datefmt="%d-%m-%Y %H:%M:%S")
+
+# INFO - create console logger and set level to debug
+console_logger = logging.getLogger('console_logger')
+console_logger.setLevel(logging.DEBUG)
+
+# INFO -Create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+# INFO - add formatter to ch
+ch.setFormatter(ch_formatter)
+
+# INFO - add ch to logger
+# console_logger.addHandler(ch)
+console_logger.addHandler(RichHandler(rich_tracebacks=True))

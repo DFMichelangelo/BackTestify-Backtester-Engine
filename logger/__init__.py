@@ -1,4 +1,3 @@
-
 from logger.console_logger import console_logger
 from logger.file_logger import file_logger
 
@@ -13,6 +12,7 @@ class Logger:
         message = f"[bold on {self.color}][{self.module}][/]" + \
             " - " + str(msg)
         message2 = f"[{self.module}]" + " - " + str(msg)
+
         if type == "DEBUG":
             console_logger.debug(message, extra={"markup": True})
             file_logger.debug(message2)

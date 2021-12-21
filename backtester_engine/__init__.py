@@ -2,8 +2,6 @@ from auxiliaries.enumerations import Position
 from logger import Logger
 from rich.progress import Progress
 
-logger = Logger("Backtester", "#BADA2A")
-
 
 def is_order_of_this_type(order, position):
     return (order["position"] == position).any()
