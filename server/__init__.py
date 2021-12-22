@@ -26,7 +26,6 @@ app = FastAPI()
 
 @app.get("/", response_class=HTMLResponse)
 def root(request: Request):
-    1/0
     return f'''
        <html >
            <head >
