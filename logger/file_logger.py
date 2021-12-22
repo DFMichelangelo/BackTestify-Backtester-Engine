@@ -1,4 +1,8 @@
 import logging
+import os
+
+if not(os.path.exists(os.path.join(os.getcwd(), 'logs'))):
+    os.mkdir(os.path.join(os.getcwd(), 'logs'))
 
 # INFO - Create formatter
 fh_formatter = logging.Formatter(
