@@ -22,4 +22,4 @@ autopep8 = "*"
 python_version = "3.9"
 
 [scripts]
-start = "uvicorn main:app --reload"
+start = "uvicorn server.app:app --reload"
