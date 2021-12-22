@@ -13,12 +13,12 @@ from logger import Logger
 
 init_std_logger()
 
-log = Logger("Init", "green")
-log.debug('debug message')
-log.info('info message')
-log.warning('warn message')
-log.error('error message')
-log.critical('critical message')
+log = Logger("Initialize App", "green")
+#log.debug('debug message')
+#log.info('info message')
+#log.warning('warn message')
+#log.error('error message')
+#log.critical('critical message')
 
 
 app = FastAPI()
@@ -26,18 +26,21 @@ app = FastAPI()
 
 @app.get("/", response_class=HTMLResponse)
 def root(request: Request):
-    return f'''
-       <html >
-           <head >
-               <title > BackTestiPy Backend < /title >
-           </head >
-           <body >
-               <h1 > BackTestiPy Backend < /h1 >
-               <a href = {str(request.url)+"docs"} > <h2 > API Documentation in Swagger < /h2 > </a >
-               <a href = {str(request.url)+"redoc"} > <h2 > API Documentation in Redoc < /h2 > </a >
-           </body >
-       </html >
-       '''
+    html_content = f'''
+    <html>
+        <head>
+            <title>BackTestiPy Backend</title >
+        </head>
+        <body>
+            <h1> BackTestiPy Backend </h1>
+            <a href = {str(request.url)+"docs"}> <h2> API Documentation in Swagger </h2> </a>
+            <a href = {str(request.url)+"redoc"}> <h2> API Documentation in Redoc </h2> </a>
+         </body>
+     </html>
+     '''
+    return HTMLResponse(content=html_content, status_code=200)
+
+    # return HTMLResponse(content=html_content, status_code=200)
 
 
 @app.post("/backtest_strategy")

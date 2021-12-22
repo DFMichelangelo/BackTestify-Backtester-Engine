@@ -1,18 +1,16 @@
 from logger.init_system_loggers import init_sys_loggers
 import uvicorn
 import os
-uvicorn_config = {
-    "app": "server.initialize_app:app",
-    "host": "127.0.0.1",
-    "log_level": "debug",
-    "use_colors": True,
-}
-if __name__ == "__main__":
-    if os.getenv('ENVIRONMENT') == 'development':
-        init_sys_loggers()
-        uvicorn_config["log_config"] = None
-        uvicorn_config["reload"] = True
 
+if os.getenv('ENVIRONMENT') == 'development':
+    init_sys_loggers()
+
+if __name__ == "__main__":
     uvicorn.run(
-        **uvicorn_config
+        "server.initialize_app:app",
+        host="127.0.0.1",
+        log_level="debug",
+        use_colors=True,
+        log_config=None,
+        reload=True
     )

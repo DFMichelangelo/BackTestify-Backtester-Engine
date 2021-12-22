@@ -1,6 +1,5 @@
 import logging
 from rich.logging import RichHandler
-import os
 
 
 def init_sys_loggers():
