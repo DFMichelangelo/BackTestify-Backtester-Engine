@@ -6,7 +6,7 @@ from auxiliaries.enumerations import Position
 class RSI_strategy(Strategy):
     def __init__(self, indicators_parameters):
         self.indicators = {
-            "RSI": RSI(*indicators_parameters)
+            "RSI": RSI(indicators_parameters)
         }
 
     def check_for_signals(self, data):

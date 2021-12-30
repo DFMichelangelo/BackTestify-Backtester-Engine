@@ -1,15 +1,21 @@
 import pandas as pd
 import uuid
-from auxiliaries.dates_converters import convert_from_DDMMYYYY_date_string_to_DDMMYYYYHHMM_datetime
+from auxiliaries.dates_converters import convert_from_DDMMYYYY_date_string_to_DDMMYYYYhhmm_datetime
 from auxiliaries.enumerations import Order_Status, Position
+from logger import Logger
+log = Logger("Backtester Engine", "purple")
 
 
 class Portfolio:
     def __init__(self, initial_value, starting_date, strategy):
-        starting_date_formatted = convert_from_DDMMYYYY_date_string_to_DDMMYYYYHHMM_datetime(
+        starting_date_formatted = convert_from_DDMMYYYY_date_string_to_DDMMYYYYhhmm_datetime(
             starting_date)
         self.value_history = pd.DataFrame(
-            data={"date": [starting_date_formatted], "value": [initial_value]})
+            data={
+                "date": [starting_date_formatted],
+                "liquidity": [initial_value],
+                "unrealized_pnl": [0]
+            })
         self.strategy = strategy
         self.orders = pd.DataFrame(data={
             "ID": [],
@@ -39,8 +45,14 @@ class Portfolio:
 
         })
 
-    def value(self):
-        return self.value_history["value"].iloc[-1]
+    def liquidity(self):
+        return self.value_history["liquidity"].iloc[-1]
+
+    def update_orders_unrealized_pnls(self, today_price):
+        pass
+
+    def update_portfolio_unrealized_pnls(self, today_date, today_price):
+        pass
 
     def add_order(self, order):
         #self.orders = self.orders.append(order, ignore_index=True)
@@ -68,7 +80,7 @@ class Portfolio:
         }
         portfolio_new_value_history = {
             "date": creation_date,
-            "value": self.value()-creation_price
+            "value": self.liquidity()-creation_price
         }
 
         self.add_order(order)
@@ -96,14 +108,18 @@ class Portfolio:
             order["pnl"] = order["size"] * (price-order["open_price"])
         elif order["position"] == Position.SHORT:
             order["pnl"] = order["size"] * ((order["open_price"]-price))
-        self.orders.loc[self.orders["ID"] == open_order["ID"]] = order
 
-        porfolio_value_before_order_close = self.value()
+        self.orders.where(self.orders["ID"] ==
+                          open_order["ID"]).iloc[0] = order
+        #self.orders.loc[self.orders["ID"] == open_order["ID"]] = order
+
+        porfolio_value_before_order_close = self.liquidity()
         portfolio_value = porfolio_value_before_order_close+order["pnl"]
         self.value_history.loc[len(self.value_history)+1] = {
             "date": date,
             "value": portfolio_value
         }
+        log.debug(f"Order closed. Order ID: {order['ID']}")
         return order
 
     def check_for_orders_to_close(self, today_price, today_date):

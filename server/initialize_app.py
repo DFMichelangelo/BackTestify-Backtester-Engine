@@ -4,7 +4,6 @@ from fastapi.responses import HTMLResponse
 from models import backtest_strategy_model
 from fastapi import FastAPI
 from data_downloader import download_financial_data
-from analytics import create_analytics
 from strategies.RSI import RSI_strategy
 from portfolio import Portfolio
 import backtester_engine
@@ -52,7 +51,7 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
         backtest_strategy_data.start_date,
         backtest_strategy_data.end_date,
         backtest_strategy_data.input_data.timeframe,
-        backtest_strategy_data.input_data.provider
+        "yahoo"  # backtest_strategy_data.input_data.provider
     )
 
     # INFO - Select Strategy
@@ -74,4 +73,7 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
         financial_data
     )
 
-    #create_analytics(portfolio, financial_data)
+    log.debug("Portfolio Value")
+    log.debug(portfolio.value_history)
+    log.debug("Portfolio Orders")
+    log.debug(portfolio.orders)

@@ -1,1 +1,1 @@
-# BackTestiPy
+# Backtestify
