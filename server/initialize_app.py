@@ -63,6 +63,8 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
     portfolio = Portfolio(
         initial_value=backtest_strategy_data.initial_portfolio_value,
         starting_date=backtest_strategy_data.start_date,
+        # starting_date=financial_data.iloc[strategy.amount_of_data_for_strategy_from_today(
+        # )-1, :]["Date"],
         strategy=strategy
     )
 

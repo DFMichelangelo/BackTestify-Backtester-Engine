@@ -29,23 +29,24 @@ def backtest_strategy(portfolio, strategy, financial_data):
             f"[NEW DAY] Date Index: {date_index} | Date: {today_date} | Price: {today_price} ")
 
         # SECTION - BETA
-        # INFO - Check if you can close orders that go in take profit or stop loss
-        portfolio.check_for_orders_to_close(today_price, today_date)
+        portfolio.update_orders_value(today_price)
         # END SECTION - BETA
 
         # SECTION - GAMMA
-        # TODO - complete function
-        portfolio.update_orders_unrealized_pnls(today_price)
+        portfolio.update_portfolio_assets_value(today_date)
         # END SECTION - GAMMA
 
         # SECTION - DELTA
-        # TODO - complete function
-        portfolio.update_portfolio_unrealized_pnls(today_date, today_price)
+        # INFO - Check if you can close orders that go in take profit or stop loss
+        portfolio.check_for_orders_to_close(today_price, today_date)
         # END SECTION - DELTA
+
+        #log.critical(f"Portfolio: {portfolio.value_history}")
+        #log.critical(f"Orders: {portfolio.orders}")
 
         # SECTION - EPSILON
         # INFO - If the portfolio is empty or  is the last day, close all orders that are open at the close price, then stop the backtesting
-        if portfolio.liquidity() <= 0 or (date_index == amount_of_financial_data):
+        if portfolio.liquidity() <= 0 or (date_index == amount_of_financial_data-1):
             portfolio.close_all_orders(today_price, today_date)
             break
         # END SECTION - EPSILON
@@ -54,15 +55,16 @@ def backtest_strategy(portfolio, strategy, financial_data):
         # INFO - check what strategy says (buy/sell/idle)
         position = strategy.check_for_signals(data_input_for_strategy)
         # END SECTION - ZETA
-        log.debug(f"Position: {position}")
+
         # SECTION - ETA
         if position == Position.IDLE:
             continue
         # END SECTION - ETA
-
+        log.debug(f"Position: {position}")
         # SECTION - THETA
         # INFO - check if there are orders open
-        open_orders = portfolio.check_for_open_orders(position)
+        open_orders = portfolio.get_open_orders(position)
+        log.debug(f"Open Orders: {open_orders}")
         # END SECTION - THETA
 
         # SECTION - IOTA

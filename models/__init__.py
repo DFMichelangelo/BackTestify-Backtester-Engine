@@ -5,7 +5,7 @@ from pydantic import BaseModel
 class input_data_model(BaseModel):
     timeframe: str
     financial_instrument_name: str
-    provider: str
+    #provider: str
 
 
 class backtest_strategy_model(BaseModel):
@@ -14,3 +14,4 @@ class backtest_strategy_model(BaseModel):
     input_data: input_data_model
     initial_portfolio_value: float
     indicators_parameters: dict
+    risk_free_rate: float

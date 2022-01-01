@@ -8,12 +8,9 @@ pandas = "*"
 numpy = "*"
 pandas-datareader = "*"
 requests-cache = "*"
-plotly = "==5.4.0"
 fastapi = {extras = ["all"], version = "*"}
 gunicorn = "*"
 rich = "*"
-colorama = "*"
-termcolor = "*"
 
 [dev-packages]
 autopep8 = "*"
