@@ -9,8 +9,9 @@ numpy = "*"
 pandas-datareader = "*"
 requests-cache = "*"
 fastapi = {extras = ["all"], version = "*"}
-gunicorn = "*"
+gunicorn = "*"  
 rich = "*"
+ta-lib = "*"
 
 [dev-packages]
 autopep8 = "*"
@@ -19,4 +20,4 @@ autopep8 = "*"
 python_version = "3.9"
 
 [scripts]
-start = "uvicorn server.app:app --reload"
+start = "uvicorn server.initialize_app:app --reload"

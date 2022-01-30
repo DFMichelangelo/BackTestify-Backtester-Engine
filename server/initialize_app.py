@@ -1,6 +1,7 @@
 
 from starlette.requests import Request
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from models import backtest_strategy_model
 from fastapi import FastAPI
 from data_downloader import download_financial_data
@@ -9,7 +10,7 @@ from portfolio import Portfolio
 import backtester_engine
 from logger.std_logger import init_std_logger
 from logger import Logger
-
+from strategies.strategies import generate_inputs, get_stategy_by_name
 init_std_logger()
 
 log = Logger("Initialize App", "green")
@@ -21,6 +22,18 @@ log = Logger("Initialize App", "green")
 
 
 app = FastAPI()
+
+origins = [
+    "https://localhost:3000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -54,8 +67,11 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
         "yahoo"  # backtest_strategy_data.input_data.provider
     )
 
+    # INFO - Get Stategy
+    strategy_class = get_stategy_by_name(backtest_strategy_data.strategy_name)
+
     # INFO - Select Strategy
-    strategy = RSI_strategy(
+    strategy = strategy_class(
         backtest_strategy_data.indicators_parameters)
 
     # INFO - Create Portfolio
@@ -79,3 +95,8 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
     log.debug(portfolio.value_history)
     log.debug("Portfolio Orders")
     log.debug(portfolio.orders)
+
+
+@app.get("/get_strategies")
+def get_strategies():
+    return generate_inputs(False)

@@ -4,7 +4,12 @@ from auxiliaries.enumerations import Position
 
 
 class RSI_strategy(Strategy):
+    name = "RSI Strategy"
+    indicators_parameters_name = ["periods",
+                                  "overbought_level", "oversold_level"]
+
     def __init__(self, indicators_parameters):
+        super().__init__(indicators_parameters)
         self.indicators = {
             "RSI": RSI(indicators_parameters)
         }

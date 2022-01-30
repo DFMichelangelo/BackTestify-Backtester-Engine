@@ -3,6 +3,19 @@ from abc import ABC, abstractmethod
 
 class Strategy(ABC):
 
+    def __init__(self, indicators_parameters):
+        self.indicators_parameters = indicators_parameters
+
+    @property
+    @abstractmethod
+    def name(self):
+        pass
+
+    @property
+    @abstractmethod
+    def indicators_parameters_name(self):
+        pass
+
     @abstractmethod
     def check_for_signals(self, data):
         pass

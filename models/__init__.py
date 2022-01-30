@@ -11,6 +11,7 @@ class input_data_model(BaseModel):
 class backtest_strategy_model(BaseModel):
     start_date: str
     end_date: str
+    strategy_name: str
     input_data: input_data_model
     initial_portfolio_value: float
     indicators_parameters: dict
