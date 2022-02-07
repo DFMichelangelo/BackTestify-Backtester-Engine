@@ -16,3 +16,4 @@ class backtest_strategy_model(BaseModel):
     initial_portfolio_value: float
     indicators_parameters: dict
     risk_free_rate: float
+    benchmark_financial_instrument_name: str

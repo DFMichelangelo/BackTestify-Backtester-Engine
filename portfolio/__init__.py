@@ -9,11 +9,9 @@ log = Logger("Backtester Engine", "purple")
 
 class Portfolio:
     def __init__(self, initial_value, starting_date, strategy):
-        starting_date_formatted = convert_from_DDMMYYYY_date_string_to_DDMMYYYYhhmmss_datetime(
-            starting_date)
         self.value_history = pd.DataFrame(
             data={
-                "date": [starting_date_formatted],
+                "date": [starting_date],
                 "liquidity": [initial_value],
                 "assets_value": [0]
             })
@@ -142,7 +140,7 @@ class Portfolio:
             "liquidity": portfolio_liquidity,
             "assets_value": portfolio_assets_value
         }
-        log.debug(f"Order closed. Order ID: {open_order['ID']}")
+        #log.debug(f"Order closed. Order ID: {open_order['ID']}")
         return open_order
 
     def check_for_orders_to_close(self, today_price, today_date):

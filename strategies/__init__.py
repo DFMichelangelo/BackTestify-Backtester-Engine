@@ -13,7 +13,7 @@ class Strategy(ABC):
 
     @property
     @abstractmethod
-    def indicators_parameters_name(self):
+    def indicators_parameters_config(self):
         pass
 
     @abstractmethod

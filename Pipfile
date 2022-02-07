@@ -15,9 +15,12 @@ ta-lib = "*"
 
 [dev-packages]
 autopep8 = "*"
+pandasgui = "*"
+pypiwin32 = "*"
 
 [requires]
 python_version = "3.9"
 
 [scripts]
 start = "uvicorn server.initialize_app:app --reload"
+dev = "python './main.py' "

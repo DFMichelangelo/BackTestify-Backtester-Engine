@@ -25,8 +25,8 @@ def backtest_strategy(portfolio, strategy, financial_data):
         today_date = financial_data.iloc[date_index, :]["Date"]
         # END SECTION - ALPHA
 
-        log.debug(
-            f"[NEW DAY] Date Index: {date_index} | Date: {today_date} | Price: {today_price} ")
+        # log.debug(
+        #    f"[NEW DAY] Date Index: {date_index} | Date: {today_date} | Price: {today_price} ")
 
         # SECTION - BETA
         portfolio.update_orders_value(today_price)
@@ -60,11 +60,11 @@ def backtest_strategy(portfolio, strategy, financial_data):
         if position == Position.IDLE:
             continue
         # END SECTION - ETA
-        log.debug(f"Position: {position}")
+        #log.debug(f"Position: {position}")
         # SECTION - THETA
         # INFO - check if there are orders open
         open_orders = portfolio.get_open_orders(position)
-        log.debug(f"Open Orders: {open_orders}")
+        #log.debug(f"Open Orders: {open_orders}")
         # END SECTION - THETA
 
         # SECTION - IOTA
@@ -81,8 +81,8 @@ def backtest_strategy(portfolio, strategy, financial_data):
                 creation_date=today_date,
                 position=position
             )
-            log.debug(
-                f"New Order. Order ID: {order_created['ID']}")
+            # log.debug(
+            #    f"New Order. Order ID: {order_created['ID']}")
         # END SECTION - KAPPA
 
         # SECTION - LAMBDA
@@ -97,8 +97,8 @@ def backtest_strategy(portfolio, strategy, financial_data):
                 open_date=today_date,
                 position=position
             )
-            log.debug(
-                f"New Order. Order ID: {order_created['ID']}")
+            # log.debug(
+            #    f"New Order. Order ID: {order_created['ID']}")
         # END SECTION - LAMBDA
 
     return portfolio, backtest_info

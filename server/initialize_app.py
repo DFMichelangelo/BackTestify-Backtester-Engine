@@ -2,18 +2,24 @@
 from starlette.requests import Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from models import backtest_strategy_model
-from fastapi import FastAPI
+from fastapi import FastAPI, status, Request
 from data_downloader import download_financial_data
 from strategies.RSI import RSI_strategy
 from portfolio import Portfolio
 import backtester_engine
 from logger.std_logger import init_std_logger
 from logger import Logger
+from pandasgui import show
 from strategies.strategies import generate_inputs, get_stategy_by_name
+from analytics.portfolio import absolute_return_over_period, percentage_return_over_period, portfolio_volatility_over_period
+from analytics.orders import orders_amount_for_types
 init_std_logger()
 
 log = Logger("Initialize App", "green")
+logExceptions = Logger("Exceptions", "green")
 #log.debug('debug message')
 #log.info('info message')
 #log.warning('warn message')
@@ -22,6 +28,14 @@ log = Logger("Initialize App", "green")
 
 
 app = FastAPI()
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    exc_str = f'{exc}'.replace('\n', ' ').replace('   ', ' ')
+    logExceptions.error(f"{request}: {exc_str}")
+    content = {'status_code': 10422, 'message': exc_str, 'data': None}
+    return JSONResponse(content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 origins = [
     "https://localhost:3000"
@@ -93,8 +107,24 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
 
     log.debug("Portfolio Value")
     log.debug(portfolio.value_history)
-    log.debug("Portfolio Orders")
-    log.debug(portfolio.orders)
+    #show(portfolio.value_history, portfolio.orders)
+    #log.debug("Portfolio Orders")
+    # log.debug(portfolio.orders)
+
+    return {
+        # "analytics": {
+        #    "portfolio:": {
+        #        "absolute_return_over_period": absolute_return_over_period(portfolio),
+        #        "percentage_return_over_period": percentage_return_over_period(portfolio),
+        #        "portfolio_volatility_over_period": portfolio_volatility_over_period(portfolio),
+        #    },
+        #    "orders": orders_amount_for_types(portfolio.orders)
+        # },
+        "raw_data": {
+            "portfolio_value_history": portfolio.value_history.to_dict('records'),
+            "orders": portfolio.orders.to_dict('records')
+        }
+    }
 
 
 @app.get("/get_strategies")

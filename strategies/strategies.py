@@ -7,7 +7,7 @@ def spread_strategy_in_object(strategy, add_strategy_class):
     # extract name and parameters from each strategy
     strategy_spreaded = {
         "name": strategy.name,
-        "indicators_parameters_name": strategy.indicators_parameters_name
+        "indicators_parameters_config": strategy.indicators_parameters_config
     }
     if add_strategy_class:
         strategy_spreaded["strategy"] = strategy

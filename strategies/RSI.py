@@ -5,8 +5,18 @@ from auxiliaries.enumerations import Position
 
 class RSI_strategy(Strategy):
     name = "RSI Strategy"
-    indicators_parameters_name = ["periods",
-                                  "overbought_level", "oversold_level"]
+    indicators_parameters_config = [
+        {
+            "name": "periods",
+            "default_value": 5
+        },
+        {
+            "name": "overbought_level",
+            "default_value": 0.7
+        }, {
+            "name": "oversold_level",
+            "default_value": 0.3
+        }]
 
     def __init__(self, indicators_parameters):
         super().__init__(indicators_parameters)
