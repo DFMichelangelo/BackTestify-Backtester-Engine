@@ -11,13 +11,14 @@ requests-cache = "*"
 fastapi = {extras = ["all"], version = "*"}
 gunicorn = "*"  
 rich = "*"
-pandasgui = "*"
+
 
 
 [dev-packages]
 autopep8 = "*"
 pypiwin32 = "*"
 ta-lib = "*"
+pandasgui = "*"
 
 [requires]
 python_version = "3.9"

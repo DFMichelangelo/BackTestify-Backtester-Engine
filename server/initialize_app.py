@@ -12,7 +12,6 @@ from portfolio import Portfolio
 import backtester_engine
 from logger.std_logger import init_std_logger
 from logger import Logger
-from pandasgui import show
 from strategies.strategies import generate_inputs, get_stategy_by_name
 from analytics.portfolio import absolute_return_over_period, percentage_return_over_period, portfolio_volatility_over_period
 from analytics.orders import orders_amount_for_types
