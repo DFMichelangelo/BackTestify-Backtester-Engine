@@ -12,11 +12,11 @@ fastapi = {extras = ["all"], version = "*"}
 gunicorn = "*"  
 rich = "*"
 pandasgui = "*"
-pypiwin32 = "*"
+
 
 [dev-packages]
 autopep8 = "*"
-
+pypiwin32 = "*"
 ta-lib = "*"
 
 [requires]
