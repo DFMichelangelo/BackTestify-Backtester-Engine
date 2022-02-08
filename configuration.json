@@ -1,9 +1,0 @@
-{
-	"percentage_of_portfolio_for_each_investment": 0.1,
-	"commissions": {
-		"type": "fixed",
-		"long": "10",
-		"short": "10",
-		"overnight": "5"
-	}
-}
