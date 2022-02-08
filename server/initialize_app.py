@@ -39,6 +39,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 origins = [
     "https://localhost:3000"
+    "https://backtestify.netlify.app"
 ]
 
 app.add_middleware(
