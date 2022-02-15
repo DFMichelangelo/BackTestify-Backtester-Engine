@@ -149,7 +149,7 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
             "portfolio_value_history": portfolio.value_history.to_dict('records'),
             "orders": portfolio.orders.to_dict('records'),
             "dates": [str(date) for date in portfolio.value_history.date],
-            "prices": underlying_timeseries["Adj Close"].to_list(),
+            "underlying": underlying_timeseries["Adj Close"].to_list(),
 
         }
     }
