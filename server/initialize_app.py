@@ -13,8 +13,9 @@ import backtester_engine
 from logger.std_logger import init_std_logger
 from logger import Logger
 from strategies.strategies import generate_inputs, get_stategy_by_name
-from analytics.portfolio import absolute_return_over_period, percentage_return_over_period, portfolio_volatility_over_period
+from analytics import absolute_return_annualized, absolute_return_over_period, percentage_return_over_period, volatility_over_period, absolute_return_annualized, percentage_return_annualized, volatility_annualized
 from analytics.orders import orders_amount_for_types
+import numpy as np
 init_std_logger()
 
 log = Logger("Initialize App", "green")
@@ -73,7 +74,7 @@ def root(request: Request):
 def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
 
     # INFO - Download Data
-    financial_data = download_financial_data(
+    underlying_timeseries = download_financial_data(
         backtest_strategy_data.input_data.financial_instrument_name,
         backtest_strategy_data.start_date,
         backtest_strategy_data.end_date,
@@ -102,27 +103,54 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
     portfolio, backtest_info = backtester_engine.backtest_strategy(
         portfolio,
         strategy,
-        financial_data
+        underlying_timeseries
     )
 
-    log.debug("Portfolio Value")
-    log.debug(portfolio.value_history)
-    #show(portfolio.value_history, portfolio.orders)
-    #log.debug("Portfolio Orders")
-    # log.debug(portfolio.orders)
+    prices_distribution = np.histogram(
+        underlying_timeseries["Adj Close"].to_list(), bins=50)
 
+    returns_distribution = np.histogram(
+        underlying_timeseries["Adj Close"].pct_change().dropna().to_list(), bins=50)
+
+    prices_distribution_dict = [{"amount": int(amount), "bin_edge": float(bin_edges)}
+                                for amount, bin_edges in zip(prices_distribution[0], prices_distribution[1])]
+
+    returns_distribution_dict = [{"amount": int(amount), "bin_edge": float(bin_edges)}
+                                 for amount, bin_edges in zip(returns_distribution[0], returns_distribution[1])]
     return {
-        # "analytics": {
-        #    "portfolio:": {
-        #        "absolute_return_over_period": absolute_return_over_period(portfolio),
-        #        "percentage_return_over_period": percentage_return_over_period(portfolio),
-        #        "portfolio_volatility_over_period": portfolio_volatility_over_period(portfolio),
-        #    },
-        #    "orders": orders_amount_for_types(portfolio.orders)
-        # },
+        "analytics": {
+            "portfolio": {
+                "absolute_return_over_period": absolute_return_over_period(portfolio.value_history["liquidity"]),
+                "absolute_return_annualized": absolute_return_annualized(portfolio.value_history["liquidity"]),
+                "percentage_return_over_period": percentage_return_over_period(portfolio.value_history["liquidity"]),
+                "percentage_return_annualized": percentage_return_annualized(portfolio.value_history["liquidity"]),
+                "percentage_return_over_period": percentage_return_over_period(portfolio.value_history["liquidity"]),
+                "volatility_over_period": volatility_over_period(portfolio.total_assets_series),
+                "volatility_annualized": volatility_annualized(portfolio.total_assets_series),
+            },
+            "underlying": {
+                "returns": underlying_timeseries["Adj Close"].pct_change().fillna("").to_list(),
+                "returns_mean": underlying_timeseries["Adj Close"].pct_change().dropna().mean(),
+                "returns_std": underlying_timeseries["Adj Close"].pct_change().dropna().std(),
+                "prices_distribution": prices_distribution_dict,
+                "returns_distribution": returns_distribution_dict,
+                "absolute_return_over_period": absolute_return_over_period(underlying_timeseries["Adj Close"]),
+                "absolute_return_annualized": absolute_return_annualized(underlying_timeseries["Adj Close"]),
+                "percentage_return_over_period": percentage_return_over_period(underlying_timeseries["Adj Close"]),
+                "percentage_return_annualized": percentage_return_annualized(underlying_timeseries["Adj Close"]),
+                "percentage_return_over_period": percentage_return_over_period(underlying_timeseries["Adj Close"]),
+                "volatility_over_period": volatility_over_period(underlying_timeseries["Adj Close"]),
+                "volatility_annualized": volatility_annualized(underlying_timeseries["Adj Close"]),
+            },
+            #    "orders": orders_amount_for_types(portfolio.orders)
+        },
+
         "raw_data": {
             "portfolio_value_history": portfolio.value_history.to_dict('records'),
-            "orders": portfolio.orders.to_dict('records')
+            "orders": portfolio.orders.to_dict('records'),
+            "dates": [str(date) for date in portfolio.value_history.date],
+            "prices": underlying_timeseries["Adj Close"].to_list(),
+
         }
     }
 
@@ -130,3 +158,8 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
 @app.get("/get_strategies")
 def get_strategies():
     return generate_inputs(False)
+
+
+@app.post("/create_strategy")
+def create_strategy():
+    pass

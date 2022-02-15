@@ -3,11 +3,12 @@ import uuid
 from auxiliaries.dates_converters import convert_from_DDMMYYYY_date_string_to_DDMMYYYYhhmmss_datetime
 from auxiliaries.enumerations import Order_Status, Position
 from logger import Logger
+from abc import ABC, abstractmethod
 
 log = Logger("Backtester Engine", "purple")
 
 
-class Portfolio:
+class Portfolio(ABC):
     def __init__(self, initial_value, starting_date, strategy):
         self.value_history = pd.DataFrame(
             data={
@@ -44,6 +45,10 @@ class Portfolio:
             # trail_take_profit_percentage:[],
 
         })
+
+    @property
+    def total_assets_series(self):
+        return self.value_history["liquidity"]+self.value_history["assets_value"]
 
     def liquidity(self):
         # INFO - get the current liquidity of the portfolio from value_history
@@ -94,7 +99,7 @@ class Portfolio:
             "position": position,
             # "order_type": order_type,
             "open_price": creation_price,  # TODO - Provisional
-            "open_date": creation_price,
+            "open_date": creation_date,     # TODO - Provisional
             "close_price": None,
             "close_date": None,
             "take_profit_price": creation_price*tp_perc,  # TODO - Provisional
@@ -140,7 +145,7 @@ class Portfolio:
             "liquidity": portfolio_liquidity,
             "assets_value": portfolio_assets_value
         }
-        #log.debug(f"Order closed. Order ID: {open_order['ID']}")
+        # log.debug(f"Order closed. Order ID: {open_order['ID']}")
         return open_order
 
     def check_for_orders_to_close(self, today_price, today_date):
