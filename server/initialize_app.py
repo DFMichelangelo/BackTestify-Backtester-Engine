@@ -15,6 +15,7 @@ from logger import Logger
 from strategies.strategies import generate_inputs, get_stategy_by_name
 from analytics import absolute_return_annualized, absolute_return_over_period, percentage_return_over_period, volatility_over_period, absolute_return_annualized, percentage_return_annualized, volatility_annualized
 from analytics.orders import orders_amount_for_types
+from analytics.performance import sharpe_ratio_annualized
 import numpy as np
 init_std_logger()
 
@@ -142,7 +143,10 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
                 "volatility_over_period": volatility_over_period(underlying_timeseries["Adj Close"]),
                 "volatility_annualized": volatility_annualized(underlying_timeseries["Adj Close"]),
             },
-            "orders": orders_amount_for_types(portfolio.orders)
+            "orders": orders_amount_for_types(portfolio.orders),
+            "performance": {
+                "sharpe_ratio_annualized": sharpe_ratio_annualized(portfolio.total_assets_series, backtest_strategy_data.risk_free_rate),
+            }
         },
 
         "raw_data": {
