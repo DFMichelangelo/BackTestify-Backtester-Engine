@@ -142,7 +142,7 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
                 "volatility_over_period": volatility_over_period(underlying_timeseries["Adj Close"]),
                 "volatility_annualized": volatility_annualized(underlying_timeseries["Adj Close"]),
             },
-            #    "orders": orders_amount_for_types(portfolio.orders)
+            "orders": orders_amount_for_types(portfolio.orders)
         },
 
         "raw_data": {
