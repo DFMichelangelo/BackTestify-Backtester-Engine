@@ -7,13 +7,12 @@ from fastapi.responses import JSONResponse
 from models import backtest_strategy_model
 from fastapi import FastAPI, status, Request
 from data_downloader import download_financial_data
-from strategies.RSI import RSI_strategy
 from portfolio import Portfolio
 import backtester_engine
 from logger.std_logger import init_std_logger
 from logger import Logger
 from strategies.strategies import generate_inputs, get_stategy_by_name
-from analytics import absolute_return_annualized, absolute_return_over_period, percentage_return_over_period, volatility_over_period, absolute_return_annualized, percentage_return_annualized, volatility_annualized
+from analytics import absolute_return_annualized, autocorrelation_function, partial_autocorrelation_function, absolute_return_over_period, percentage_return_over_period, volatility_over_period, absolute_return_annualized, percentage_return_annualized, volatility_annualized
 from analytics.orders import orders_amount_for_types
 from analytics.performance import sharpe_ratio_annualized
 import numpy as np
@@ -118,6 +117,11 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
 
     returns_distribution_dict = [{"amount": int(amount), "bin_edge": float(bin_edges)}
                                  for amount, bin_edges in zip(returns_distribution[0], returns_distribution[1])]
+
+    acf_function = autocorrelation_function(underlying_timeseries["Adj Close"])
+    pacf_function = partial_autocorrelation_function(
+        underlying_timeseries["Adj Close"])
+
     return {
         "analytics": {
             "portfolio": {
@@ -142,6 +146,14 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
                 "percentage_return_over_period": percentage_return_over_period(underlying_timeseries["Adj Close"]),
                 "volatility_over_period": volatility_over_period(underlying_timeseries["Adj Close"]),
                 "volatility_annualized": volatility_annualized(underlying_timeseries["Adj Close"]),
+                "autocorrelation_function": {
+                    "autocorrelation": acf_function["values"],
+                    "confidence_intervals": acf_function["confidence_intervals"]
+                },
+                "partial_autocorrelation_function": {
+                    "partialAutocorrelation": pacf_function["values"],
+                    "confidence_intervals": pacf_function["confidence_intervals"]
+                },
             },
             "orders": orders_amount_for_types(portfolio.orders),
             "performance": {
