@@ -1,5 +1,6 @@
 import numpy as np
 import statsmodels.api as sm
+import math
 
 
 def sharpe_ratio_over_period(portfolio, risk_free_rate):
@@ -37,13 +38,19 @@ def volatility_over_period(series):
     return series.pct_change().iloc[1:].std()*np.sqrt(len(series))
 
 
+def downside_volatility_annualized(series):
+    returns = series.pct_change().iloc[1:]
+    return returns[returns < 0].std()*np.sqrt(252)
+
+
 def volatility_annualized(series):
     return series.pct_change().iloc[1:].std()*np.sqrt(252)
 
 
 def autocorrelation_function(series):
+    lags = 50 if len(series) > 100 else math.floor(len(series)/2)-1
     acf, confidence_intervals = sm.tsa.acf(
-        series, nlags=50, alpha=0.05, fft=False)
+        series, nlags=lags, alpha=0.05, fft=False)
     # INFO - Remove lag 0
     acf = acf[1:]
     confidence_intervals = confidence_intervals[1:]
@@ -56,8 +63,9 @@ def autocorrelation_function(series):
 
 
 def partial_autocorrelation_function(series):
+    lags = 50 if len(series) > 100 else math.floor(len(series)/2)-1
     pacf, confidence_intervals = sm.tsa.pacf(
-        series, nlags=50, alpha=0.05)
+        series, nlags=lags, alpha=0.05)
     # INFO - Remove lag 0
     pacf = pacf[1:]
     confidence_intervals = confidence_intervals[1:]
