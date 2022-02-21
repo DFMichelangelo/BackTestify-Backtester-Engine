@@ -4,7 +4,7 @@ from auxiliaries.enumerations import Position
 
 
 class RSI_strategy(Strategy):
-    name = "RSI Strategy"
+    name = "RSI"
     indicators_parameters_config = [
         {
             "name": "periods",

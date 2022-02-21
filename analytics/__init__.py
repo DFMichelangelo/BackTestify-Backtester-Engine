@@ -13,7 +13,7 @@ def sharpe_ratio_over_period(portfolio, risk_free_rate):
 
 
 def annualize_rate(rate, time):
-    return (1+rate)**(time/252)-1
+    return (1+rate)**(252/time)-1
 
 
 def absolute_return_over_period(series):

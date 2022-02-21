@@ -4,7 +4,7 @@ import talib as ta
 
 
 class MA_crossover_strategy(Strategy):
-    name = "MA Crossover Strategy"
+    name = "MA Crossover"
     indicators_parameters_config = [
         {
             "name": "fast_SMA_periods",

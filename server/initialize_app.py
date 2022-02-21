@@ -117,10 +117,10 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
         )
 
         prices_distribution = np.histogram(
-            underlying_timeseries["Adj Close"].to_list(), bins=50)
+            benchmark_timeseries["Adj Close"].to_list(), bins=50)
 
         returns_distribution = np.histogram(
-            underlying_timeseries["Adj Close"].pct_change().dropna().to_list(), bins=50)
+            benchmark_timeseries["Adj Close"].pct_change().dropna().to_list(), bins=50)
 
         prices_distribution_dict = [{"amount": int(amount), "bin_edge": float(bin_edges)}
                                     for amount, bin_edges in zip(prices_distribution[0], prices_distribution[1])]
@@ -129,9 +129,9 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
                                      for amount, bin_edges in zip(returns_distribution[0], returns_distribution[1])]
 
         acf_function = autocorrelation_function(
-            underlying_timeseries["Adj Close"])
+            benchmark_timeseries["Adj Close"])
         pacf_function = partial_autocorrelation_function(
-            underlying_timeseries["Adj Close"])
+            benchmark_timeseries["Adj Close"])
 
         return {
             "analytics": {
@@ -140,29 +140,21 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
                     "absolute_return_annualized": absolute_return_annualized(portfolio.value_history["liquidity"]),
                     "percentage_return_over_period": percentage_return_over_period(portfolio.value_history["liquidity"]),
                     "percentage_return_annualized": percentage_return_annualized(portfolio.value_history["liquidity"]),
-                    "percentage_return_over_period": percentage_return_over_period(portfolio.value_history["liquidity"]),
                     "volatility_over_period": volatility_over_period(portfolio.total_assets_series),
                     "volatility_annualized": volatility_annualized(portfolio.total_assets_series),
                 },
                 "benchmark": {
+                    "returns": benchmark_timeseries["Adj Close"].pct_change().fillna("").to_list(),
+                    "returns_mean": benchmark_timeseries["Adj Close"].pct_change().dropna().mean(),
+                    "returns_std": benchmark_timeseries["Adj Close"].pct_change().dropna().std(),
+                    "prices_distribution": prices_distribution_dict,
+                    "returns_distribution": returns_distribution_dict,
+                    "absolute_return_over_period": absolute_return_over_period(benchmark_timeseries["Adj Close"]),
+                    "absolute_return_annualized": absolute_return_annualized(benchmark_timeseries["Adj Close"]),
                     "percentage_return_over_period": percentage_return_over_period(benchmark_timeseries["Adj Close"]),
                     "percentage_return_annualized": percentage_return_annualized(benchmark_timeseries["Adj Close"]),
                     "volatility_over_period": volatility_over_period(benchmark_timeseries["Adj Close"]),
                     "volatility_annualized": volatility_annualized(benchmark_timeseries["Adj Close"]),
-
-                },
-                "underlying": {
-                    "returns": underlying_timeseries["Adj Close"].pct_change().fillna("").to_list(),
-                    "returns_mean": underlying_timeseries["Adj Close"].pct_change().dropna().mean(),
-                    "returns_std": underlying_timeseries["Adj Close"].pct_change().dropna().std(),
-                    "prices_distribution": prices_distribution_dict,
-                    "returns_distribution": returns_distribution_dict,
-                    "absolute_return_over_period": absolute_return_over_period(underlying_timeseries["Adj Close"]),
-                    "absolute_return_annualized": absolute_return_annualized(underlying_timeseries["Adj Close"]),
-                    "percentage_return_over_period": percentage_return_over_period(underlying_timeseries["Adj Close"]),
-                    "percentage_return_annualized": percentage_return_annualized(underlying_timeseries["Adj Close"]),
-                    "volatility_over_period": volatility_over_period(underlying_timeseries["Adj Close"]),
-                    "volatility_annualized": volatility_annualized(underlying_timeseries["Adj Close"]),
                     "autocorrelation_function": {
                         "autocorrelation": acf_function["values"],
                         "confidence_intervals": acf_function["confidence_intervals"]
@@ -171,6 +163,14 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
                         "partialAutocorrelation": pacf_function["values"],
                         "confidence_intervals": pacf_function["confidence_intervals"]
                     },
+
+                },
+                "underlying": {
+                    "percentage_return_over_period": percentage_return_over_period(underlying_timeseries["Adj Close"]),
+                    "percentage_return_annualized": percentage_return_annualized(underlying_timeseries["Adj Close"]),
+                    "volatility_over_period": volatility_over_period(underlying_timeseries["Adj Close"]),
+                    "volatility_annualized": volatility_annualized(underlying_timeseries["Adj Close"]),
+
                 },
                 "orders": orders_amount_for_types(portfolio.orders),
                 "performance": {
@@ -184,7 +184,8 @@ def backtest_strategy(backtest_strategy_data: backtest_strategy_model):
                 "dates": [str(date) for date in portfolio.value_history.date],
                 "underlying": underlying_timeseries["Adj Close"].to_list(),
                 "benchmark": benchmark_timeseries["Adj Close"].to_list(),
-            }
+            },
+            "amount_of_data_for_strategy_from_today": strategy.amount_of_data_for_strategy_from_today(),
         }
 
     except Exception as e:
