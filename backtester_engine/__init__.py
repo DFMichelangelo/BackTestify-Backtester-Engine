@@ -9,9 +9,9 @@ def is_order_of_this_type(order, position):
 log = Logger("Backtester Engine", "purple")
 
 
-def backtest_strategy(portfolio, strategy, financial_data):
+def backtest_strategy(portfolio, financial_data):
     backtest_info = {}
-    amount_of_data_for_strategy_from_today = strategy.amount_of_data_for_strategy_from_today()
+    amount_of_data_for_strategy_from_today = portfolio.strategy.amount_of_data_for_strategy_from_today()
     amount_of_financial_data = len(financial_data.index)
 
     for date_index in range(amount_of_data_for_strategy_from_today, amount_of_financial_data):
@@ -53,7 +53,8 @@ def backtest_strategy(portfolio, strategy, financial_data):
 
         # SECTION - ZETA
         # INFO - check what strategy says (buy/sell/idle)
-        position = strategy.check_for_signals(data_input_for_strategy)
+        position = portfolio.strategy.check_for_signals(
+            data_input_for_strategy)
         # END SECTION - ZETA
 
         # SECTION - ETA
@@ -63,7 +64,7 @@ def backtest_strategy(portfolio, strategy, financial_data):
         #log.debug(f"Position: {position}")
         # SECTION - THETA
         # INFO - check if there are orders open
-        open_orders = portfolio.get_open_orders(position)
+        open_orders = portfolio.get_open_orders_of_certain_position(position)
         #log.debug(f"Open Orders: {open_orders}")
         # END SECTION - THETA
 

@@ -14,7 +14,8 @@ class Portfolio(ABC):
             data={
                 "date": [starting_date],
                 "liquidity": [initial_value],
-                "assets_value": [0]
+                "assets_value": [0],
+                "total_portfolio_value": [initial_value]
             })
         self.strategy = strategy
         self.orders = pd.DataFrame(data={
@@ -46,10 +47,6 @@ class Portfolio(ABC):
 
         })
 
-    @property
-    def total_assets_series(self):
-        return self.value_history["liquidity"]+self.value_history["assets_value"]
-
     def liquidity(self):
         # INFO - get the current liquidity of the portfolio from value_history
         return self.value_history.iloc[-1]["liquidity"]
@@ -62,7 +59,7 @@ class Portfolio(ABC):
         open_orders_filter = self.orders["status"] == Order_Status.OPEN
 
         self.orders.loc[open_orders_filter, "value"] = today_price
-
+        # TODO - write PnL
         ''' PNL
         # INFO - get open orders (Short and Long) and calculate their P&L using the today_price and their opening price
         open_orders_filter = self.orders["status"] == Order_Status.OPEN
@@ -81,10 +78,13 @@ class Portfolio(ABC):
 
     def update_portfolio_assets_value(self, today_date):
         # INFO - Update the value history
+        assets_value = self.orders[self.orders["status"]
+                                   == Order_Status.OPEN]["value"].sum()
         self.value_history.loc[len(self.value_history)] = {
             "date": today_date,
             "liquidity": self.liquidity(),
-            "assets_value": self.orders[self.orders["status"] == Order_Status.OPEN]["value"].sum()
+            "assets_value": assets_value,
+            "total_portfolio_value": self.liquidity() + assets_value
         }
 
     def create_order(self, creation_price, creation_date, position):
@@ -115,7 +115,8 @@ class Portfolio(ABC):
         portfolio_new_value_history = {
             "date": creation_date,
             "liquidity": self.liquidity()-creation_price,
-            "assets_value": self.assets_value()+order["value"]
+            "assets_value": self.assets_value()+order["value"],
+            "total_portfolio_value": self.liquidity()-creation_price+self.assets_value()+order["value"]
         }
 
         self.value_history.loc[len(
@@ -143,7 +144,8 @@ class Portfolio(ABC):
         self.value_history.loc[len(self.value_history)-1] = {
             "date": date,
             "liquidity": portfolio_liquidity,
-            "assets_value": portfolio_assets_value
+            "assets_value": portfolio_assets_value,
+            "total_portfolio_value": portfolio_liquidity+portfolio_assets_value
         }
         # log.debug(f"Order closed. Order ID: {open_order['ID']}")
         return open_order
@@ -155,14 +157,15 @@ class Portfolio(ABC):
         order_open_filter = self.orders["status"] == Order_Status.OPEN
         # INFO - Select OPEN orders with LONG position where today_price>=take_profit or today_price<=stop_loss
         long_orders_to_close_in_tp = (orders_long_filter & order_open_filter & (
-            self.orders["take_profit_price"] <= today_price))
+            today_price >= self.orders["take_profit_price"]))
         long_orders_to_close_in_sl = (orders_long_filter & order_open_filter & (
-            self.orders["stop_loss_price"] >= today_price))
+            today_price <= self.orders["stop_loss_price"]))
 
+        # INFO - Select OPEN orders with SHORT position where today_price<=take_profit or today_price>=stop_loss
         short_orders_to_close_in_tp = (orders_short_filter & order_open_filter & (
-            self.orders["take_profit_price"] <= today_price))
+            today_price <= self.orders["take_profit_price"]))
         short_orders_to_close_in_tp = (orders_short_filter & order_open_filter & (
-            self.orders["stop_loss_price"] <= today_price))
+            today_price >= self.orders["stop_loss_price"]))
 
         orders_to_close = self.orders[long_orders_to_close_in_tp |
                                       long_orders_to_close_in_sl | short_orders_to_close_in_tp | short_orders_to_close_in_tp]
@@ -171,7 +174,7 @@ class Portfolio(ABC):
         for (order_index, order) in orders_to_close.iterrows():
             self.close_order(order, today_price, today_date)
 
-    def get_open_orders(self, position):
+    def get_open_orders_of_certain_position(self, position):
         order_open_filter = self.orders["status"] == Order_Status.OPEN
         position_filter = self.orders["position"] == position
         return self.orders.loc[position_filter & order_open_filter]
