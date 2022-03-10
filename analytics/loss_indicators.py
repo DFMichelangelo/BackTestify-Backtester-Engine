@@ -1,14 +1,16 @@
+import numpy as np
+
+
 def drawdown_indicator(data):
-
     info = {
-        "max_duration_has_recovered": True
+        "duration_of_max_drawdown_has_recovered": True
     }
-
     returns = data.pct_change()
-    cumulative_returns = (1 + returns).cumprod()-1
-    data = data.iloc[1:]
-    data = data.reset_index(drop=True)
+    cumulative_returns = np.cumprod(1 + returns)-1
+    cumulative_returns[np.isclose(cumulative_returns, 0)] = 0
     input_length = len(data)
+
+    data = data.iloc[1:].reset_index(drop=True)
     high_water_mark = [0]
     drawdown = [0]
     drawdown_duration = [0]
@@ -21,33 +23,42 @@ def drawdown_indicator(data):
         drawdown_duration.append(
             0 if drawdown[t] == 0 else drawdown_duration[t-1]+1)
 
-    # INFO - Get Duration of Max Drawdown
-    max_drawdown_index = drawdown_duration[drawdown.index(min(drawdown))]
     max_drawdown = min(drawdown)
 
-    while max_drawdown != 0:
-        if max_drawdown_index < input_length:
-            max_drawdown_index += 1
-            max_drawdown = drawdown[max_drawdown_index]
-        else:
-            info["max_duration_has_recovered"] = False
-            max_drawdown_index += 1
-            max_drawdown = 0
+    # INFO - Get Duration of Max Drawdown
+    index_max_drawdown = drawdown.index(max_drawdown)
+    max_drawdown_relative_index = drawdown_duration[index_max_drawdown]
 
+    ind = 0
+    # for i in range(index_max_drawdown, input_length):
+    #    if drawdown_duration[index_max_drawdown+i] == 0:
+    #        break
+    #    elif i==input_length-1:
+    #        info["duration_of_max_drawdown_has_recovered"] = False
+    #        break
+
+    while drawdown_duration[index_max_drawdown+ind] != 0:
+        max_drawdown_relative_index += 1
+        if index_max_drawdown+ind < input_length-1:
+            ind += 1
+        else:
+            info["duration_of_max_drawdown_has_recovered"] = False
+            break
+
+    max_duration = max(drawdown_duration)  # INFO - MAX duration
     # INFO - Max drawdown of max duration
-    z = max(drawdown_duration)
-    pos = drawdown_duration.index(z)
+    pos = drawdown_duration.index(max_duration)
     k = []
-    for _ in range(z):
+    for _ in range(max_duration+1):
         k.append(drawdown[pos])
         pos -= 1
 
     max_drawdown = min(drawdown)  # INFO - MAX drawdown
-    max_duration = max(drawdown_duration)  # INFO - MAX duration
     # INFO - Duration MAX drawdown
-    duration_of_max_drawdown = drawdown_duration[max_drawdown_index-1]
+    duration_of_max_drawdown = max_drawdown_relative_index-1
+
     # INFO - Drawdown of the max duration
-    drawdown_of_max_duration = min(k)
+    drawdown_of_max_duration = min(k)  # if len(k) > 0 else 0
 
     return {
         # "high_water_mark": high_water_mark,
@@ -55,8 +66,8 @@ def drawdown_indicator(data):
         "values": drawdown,
         "max_drawdown": max_drawdown,
         "max_duration": max_duration,
-        "drawdown_of_max_duration": drawdown_of_max_duration,
         "duration_of_max_drawdown": duration_of_max_drawdown,
+        "drawdown_of_max_duration": drawdown_of_max_duration,
         "info": info
     }
 

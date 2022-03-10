@@ -12,12 +12,14 @@ fastapi = {extras = ["all"], version = "*"}
 gunicorn = "*"  
 rich = "*"
 statsmodels = "*"
+pymongo = "*"
 
 [dev-packages]
 autopep8 = "*"
 pypiwin32 = "*"
 ta-lib = "*"
 pandasgui = "*"
+openpyxl = "*"
 
 [requires]
 python_version = "3.9"

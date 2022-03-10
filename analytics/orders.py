@@ -22,13 +22,13 @@ def orders_amount_for_types(orders):
         "long_orders": {
             "amount": amount_long_orders,
             "percentage": amount_long_orders/total_orders if total_orders > 0 else 0,
-            "amount_profitable_orders": amount_profitable_long_orders,
-            "percentage_profitable_orders": amount_profitable_long_orders/amount_long_orders if amount_long_orders > 0 else 0
+            "amount_profitable": amount_profitable_long_orders,
+            "percentage_profitable": amount_profitable_long_orders/amount_long_orders if amount_long_orders > 0 else 0
         },
         "short_orders": {
             "amount": amount_short_orders,
             "percentage": amount_short_orders/total_orders if total_orders > 0 else 0,
-            "amount_profitable_orders": amount_profitable_short_orders,
-            "percentage_profitable_orders": amount_profitable_short_orders/amount_short_orders if amount_short_orders > 0 else 0
+            "amount_profitable": amount_profitable_short_orders,
+            "percentage_profitable": amount_profitable_short_orders/amount_short_orders if amount_short_orders > 0 else 0
         }
     }

@@ -34,7 +34,6 @@ def main(debug=False):
     if debug:
         sys.stdout = StdLogger()
         sys.stderr = sys.stdout
-    print('test')
 
 
 def init_std_logger():
