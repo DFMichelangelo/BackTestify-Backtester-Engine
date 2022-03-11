@@ -1,9 +1,8 @@
 import pandas as pd
 import uuid
-from auxiliaries.dates_converters import convert_from_DDMMYYYY_date_string_to_DDMMYYYYhhmmss_datetime
 from auxiliaries.enumerations import Order_Status, Order_Type, Position
 from logger import Logger
-from abc import ABC, abstractmethod
+from abc import ABC
 
 log = Logger("Backtester Engine", "purple")
 
@@ -93,10 +92,7 @@ class Portfolio(ABC):
         }
 
     def create_order(self, creation_price, creation_date, position):
-
-        sl_perc = 0.98 if position == Position.LONG else 1.02  # TODO - Provisional
-
-        # INFO - Set Take Profit and StopLoss
+        # INFO - Set Take Profit and Stop Loss
         take_profit_price = None
 
         if self.options["stop_loss_and_take_profit"]["take_profit_enabled"]:
@@ -109,22 +105,23 @@ class Portfolio(ABC):
                     tp_amount if position == Position.LONG else creation_price - tp_amount
 
         stop_loss_price = None
+
         if self.options["stop_loss_and_take_profit"]["stop_loss_enabled"]:
             sl_amount = - \
                 self.options["stop_loss_and_take_profit"]["stop_loss_amount"]
             if self.options["stop_loss_and_take_profit"]["stop_loss_type"] == "percentage":
-                tp_perc = 1 - tp_amount if position == Position.LONG else 1 + tp_amount
-                stop_loss_price = creation_price*tp_perc
+                sl_perc = 1 - sl_amount if position == Position.LONG else 1 + sl_amount
+                stop_loss_price = creation_price*sl_perc
             else:
                 stop_loss_price = creation_price - \
-                    tp_amount if position == Position.LONG else creation_price + tp_amount
+                    sl_amount if position == Position.LONG else creation_price + sl_amount
 
         # INFO - Set Order Size
         size = None
         final_order_price = None
         order_size_type = self.options["portfolio"]["order_size_type"]
         order_size_amount = self.options["portfolio"]["order_size_amount"]
-        if order_size_type == "absoluteValue":
+        if order_size_type == "absolute_value":
             size = order_size_amount
             final_order_price = size*creation_price
         elif order_size_type == "percentage":

@@ -7,6 +7,12 @@ class Position(Enum):
     SHORT = "SHORT"
 
 
+class Position_Restrictions(Enum):
+    LONG_ONLY = "LONG"
+    NO_LIMITATIONS = "NO_LIMITATIONS"
+    SHORT_ONLY = "SHORT"
+
+
 class Order_Type(Enum):
     MARKET_ORDER = "MARKET_ORDER"
     LIMIT_ORDER = "LIMIT_ORDER"
@@ -50,3 +56,11 @@ class Order_Status(Enum):
     #Expired: expired
     # Margin: not enough cash to execute the order.
     # Rejected: Rejected by the broker
+
+
+def get_position_restriction(restriction):
+    if restriction == "long_only":
+        return Position_Restrictions.LONG_ONLY
+    elif restriction == "short_only":
+        return Position_Restrictions.SHORT_ONLY
+    return Position_Restrictions.NO_LIMITATIONS

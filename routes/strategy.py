@@ -8,6 +8,7 @@ from analytics import absolute_return_annualized, autocorrelation_function, part
 from analytics.orders import orders_amount_for_types
 from analytics.performance import sharpe_ratio_annualized, sortino_ratio_annualized, calmar_ratio_annualized
 from analytics.loss_indicators import drawdown_indicator, underwater_indicator
+from auxiliaries.enumerations import get_position_restriction
 import numpy as np
 
 router = APIRouter()
@@ -42,7 +43,9 @@ def backtest_strategy(backtest_strategy_data: Backtest_strategy_model):
 
     options = {
         "portfolio": backtest_strategy_data.portfolio.dict(),
-        "stop_loss_and_take_profit": backtest_strategy_data.stop_loss_and_take_profit.dict()
+        "stop_loss_and_take_profit": backtest_strategy_data.stop_loss_and_take_profit.dict(),
+        "open_new_order_on_contrarian_signal": backtest_strategy_data.open_new_order_on_contrarian_signal,
+        "orders_positions_limitations": get_position_restriction(backtest_strategy_data.orders_positions_limitations),
     }
     # INFO - Create Portfolio
     # global portfolio
@@ -77,7 +80,6 @@ def backtest_strategy(backtest_strategy_data: Backtest_strategy_model):
     drawdown = drawdown_indicator(
         portfolio.value_history["total_portfolio_value"])
 
-    print(portfolio.value_history)
     percentage_return_ann = percentage_return_annualized(
         portfolio.value_history["liquidity"])
     payload = {

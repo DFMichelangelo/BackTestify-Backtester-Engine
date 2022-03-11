@@ -1,4 +1,4 @@
-from auxiliaries.enumerations import Position
+from auxiliaries.enumerations import Position, Position_Restrictions
 from logger import Logger
 
 
@@ -7,6 +7,10 @@ def is_order_of_this_type(order, position):
 
 
 log = Logger("Backtester Engine", "purple")
+
+
+def position_limitations(portfolio, position):
+    return portfolio.options["orders_positions_limitations"] == position or portfolio.options["orders_positions_limitations"] == Position_Restrictions.NO_LIMITATIONS
 
 
 def backtest_strategy(portfolio, financial_data):
@@ -76,12 +80,13 @@ def backtest_strategy(portfolio, financial_data):
 
         # SECTION - KAPPA
         # INFO - if no order is open, open the order
-        elif(open_orders.empty):
+        elif(open_orders.empty and position_limitations(portfolio, position)):
             order_created = portfolio.create_order(
                 creation_price=today_price,
                 creation_date=today_date,
                 position=position
             )
+
             # log.debug(
             #    f"New Order. Order ID: {order_created['ID']}")
         # END SECTION - KAPPA
@@ -93,12 +98,15 @@ def backtest_strategy(portfolio, financial_data):
             # TODO - handle multiple close of orders
             portfolio.close_order(open_orders, today_price, today_date)
             # INFO - open new order
-            order_created = portfolio.create_order(
-                open_price=today_price,
-                open_date=today_date,
-                position=position
-            )
-            # log.debug(
+            if portfolio.options["orders_positions_limitations"] != Position_Restrictions.NO_LIMITATIONS:
+                continue
+            if portfolio.options.open_new_order_on_contrarian_signal:
+                order_created = portfolio.create_order(
+                    open_price=today_price,
+                    open_date=today_date,
+                    position=position
+                )
+                # log.debug(
             #    f"New Order. Order ID: {order_created['ID']}")
         # END SECTION - LAMBDA
 
