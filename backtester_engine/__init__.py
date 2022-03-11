@@ -27,19 +27,19 @@ def backtest_strategy(portfolio, financial_data):
 
         # log.debug(
         #    f"[NEW DAY] Date Index: {date_index} | Date: {today_date} | Price: {today_price} ")
+        if date_index > amount_of_data_for_strategy_from_today:
+            # SECTION - BETA
+            portfolio.update_orders_value(today_price)
+            # END SECTION - BETA
 
-        # SECTION - BETA
-        portfolio.update_orders_value(today_price)
-        # END SECTION - BETA
+            # SECTION - GAMMA
+            portfolio.update_portfolio_assets_value(today_date)
+            # END SECTION - GAMMA
 
-        # SECTION - GAMMA
-        portfolio.update_portfolio_assets_value(today_date)
-        # END SECTION - GAMMA
-
-        # SECTION - DELTA
-        # INFO - Check if you can close orders that go in take profit or stop loss
-        portfolio.check_for_orders_to_close(today_price, today_date)
-        # END SECTION - DELTA
+            # SECTION - DELTA
+            # INFO - Check if you can close orders that go in take profit or stop loss
+            portfolio.check_for_orders_to_close(today_price, today_date)
+            # END SECTION - DELTA
 
         #log.critical(f"Portfolio: {portfolio.value_history}")
         #log.critical(f"Orders: {portfolio.orders}")

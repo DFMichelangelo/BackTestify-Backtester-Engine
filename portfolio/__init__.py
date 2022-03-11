@@ -1,7 +1,7 @@
 import pandas as pd
 import uuid
 from auxiliaries.dates_converters import convert_from_DDMMYYYY_date_string_to_DDMMYYYYhhmmss_datetime
-from auxiliaries.enumerations import Order_Status, Position
+from auxiliaries.enumerations import Order_Status, Order_Type, Position
 from logger import Logger
 from abc import ABC, abstractmethod
 
@@ -9,7 +9,8 @@ log = Logger("Backtester Engine", "purple")
 
 
 class Portfolio(ABC):
-    def __init__(self, initial_value, starting_date, strategy):
+    def __init__(self, initial_value, starting_date, strategy, options):
+        self.options = options
         self.value_history = pd.DataFrame(
             data={
                 "date": [starting_date],
@@ -28,18 +29,18 @@ class Portfolio(ABC):
             "value": [],
             "open_price": [],
             "open_date": [],
+            "order_type": [],
             "take_profit_price": [],
             "stop_loss_price": [],
             "close_price": [],
             "close_date": [],
-
+            "PnL": []
             # "financial_instrument_name": [],
             # "financial_instrument_type": [],
             # "commission":[],
             # "open_order_commission":[],
             # "closed_order_commission":[],
             # "other_order_commission":[],
-            # "value":[],
             # trail_stop_loss_amount:[],
             # trail_stop_loss_percentage:[],
             # trail_take_profit_amount:[],
@@ -47,18 +48,22 @@ class Portfolio(ABC):
 
         })
 
+    # INFO - get the current liquidity of the portfolio from value_history
     def liquidity(self):
-        # INFO - get the current liquidity of the portfolio from value_history
         return self.value_history.iloc[-1]["liquidity"]
 
+    def total_portfolio_value(self):
+        return self.value_history.iloc[-1]["total_portfolio_value"]
+    # INFO - get the current assets_value of the portfolio from value_history
+
     def assets_value(self):
-        # INFO - get the current assets_value of the portfolio from value_history
         return self.value_history.iloc[-1]["assets_value"]
 
     def update_orders_value(self, today_price):
         open_orders_filter = self.orders["status"] == Order_Status.OPEN
 
-        self.orders.loc[open_orders_filter, "value"] = today_price
+        self.orders.loc[open_orders_filter, "value"] = today_price * \
+            self.orders.loc[open_orders_filter, "size"]
         # TODO - write PnL
         ''' PNL
         # INFO - get open orders (Short and Long) and calculate their P&L using the today_price and their opening price
@@ -88,8 +93,48 @@ class Portfolio(ABC):
         }
 
     def create_order(self, creation_price, creation_date, position):
-        tp_perc = 1.02 if position == Position.LONG else 0.98  # TODO - Provisional
+
         sl_perc = 0.98 if position == Position.LONG else 1.02  # TODO - Provisional
+
+        # INFO - Set Take Profit and StopLoss
+        take_profit_price = None
+
+        if self.options["stop_loss_and_take_profit"]["take_profit_enabled"]:
+            tp_amount = self.options["stop_loss_and_take_profit"]["take_profit_amount"]
+            if self.options["stop_loss_and_take_profit"]["take_profit_type"] == "percentage":
+                tp_perc = 1 + tp_amount if position == Position.LONG else 1 - tp_amount
+                take_profit_price = creation_price*tp_perc
+            else:
+                take_profit_price = creation_price + \
+                    tp_amount if position == Position.LONG else creation_price - tp_amount
+
+        stop_loss_price = None
+        if self.options["stop_loss_and_take_profit"]["stop_loss_enabled"]:
+            sl_amount = - \
+                self.options["stop_loss_and_take_profit"]["stop_loss_amount"]
+            if self.options["stop_loss_and_take_profit"]["stop_loss_type"] == "percentage":
+                tp_perc = 1 - tp_amount if position == Position.LONG else 1 + tp_amount
+                stop_loss_price = creation_price*tp_perc
+            else:
+                stop_loss_price = creation_price - \
+                    tp_amount if position == Position.LONG else creation_price + tp_amount
+
+        # INFO - Set Order Size
+        size = None
+        final_order_price = None
+        order_size_type = self.options["portfolio"]["order_size_type"]
+        order_size_amount = self.options["portfolio"]["order_size_amount"]
+        if order_size_type == "absoluteValue":
+            size = order_size_amount
+            final_order_price = size*creation_price
+        elif order_size_type == "percentage":
+            final_order_price = self.total_portfolio_value(
+            )*order_size_amount
+            size = final_order_price/creation_price
+
+        if self.liquidity() < final_order_price:
+            log.error("Not enough liquidity to create order")
+            return None
 
         order = {
             "ID": uuid.uuid4(),
@@ -97,15 +142,16 @@ class Portfolio(ABC):
             "creation_price": creation_price,
             "status": Order_Status.OPEN,
             "position": position,
-            # "order_type": order_type,
-            "open_price": creation_price,  # TODO - Provisional
-            "open_date": creation_date,     # TODO - Provisional
+            "order_type": Order_Type.MARKET_ORDER,      # TODO - Provisional
+            "open_price": creation_price,               # TODO - Provisional
+            "open_date": creation_date,                 # TODO - Provisional
             "close_price": None,
             "close_date": None,
-            "take_profit_price": creation_price*tp_perc,  # TODO - Provisional
-            "stop_loss_price": creation_price*sl_perc,  # TODO - Provisional
-            "value": creation_price,
-            "size": 1  # TODO - Provisional
+            "take_profit_price": take_profit_price,
+            "stop_loss_price": stop_loss_price,
+            "value": final_order_price,
+            "size": size,
+            "PnL": 0
         }
 
         # INFO - Add the order to the orders dataframe
@@ -114,9 +160,9 @@ class Portfolio(ABC):
         # INFO - Update the value history of portfolio
         portfolio_new_value_history = {
             "date": creation_date,
-            "liquidity": self.liquidity()-creation_price,
+            "liquidity": self.liquidity()-order["value"],
             "assets_value": self.assets_value()+order["value"],
-            "total_portfolio_value": self.liquidity()-creation_price+self.assets_value()+order["value"]
+            "total_portfolio_value": self.liquidity()+self.assets_value()
         }
 
         self.value_history.loc[len(

@@ -3,7 +3,7 @@ from logger import Logger
 from bson.codec_options import CodecOptions
 from bson.codec_options import TypeRegistry
 from repositories.type_codecs.enum_codecs import Enum_codec
-from auxiliaries.enumerations import Position, Order_Type
+from auxiliaries.enumerations import Position, Order_Type, Order_Status
 import os
 logger = Logger("Initialize MongoDB", "purple")
 
@@ -38,9 +38,10 @@ class Mongo_DB_service:
 
 position_codec = Enum_codec(Position)
 order_type_codec = Enum_codec(Order_Type)
+order_status_codec = Enum_codec(Order_Status)
 mongo_db = Mongo_DB_service(
     os.getenv("MONGO_DB_URL"),
     os.getenv("MONGO_DB_NAME"),
-    [position_codec, order_type_codec])
+    [position_codec, order_type_codec, order_status_codec])
 
 # mongo_db.create_collection("backtests")

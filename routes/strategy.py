@@ -40,15 +40,20 @@ def backtest_strategy(backtest_strategy_data: Backtest_strategy_model):
     strategy = strategy_class(
         backtest_strategy_data.indicators_parameters)
 
+    options = {
+        "portfolio": backtest_strategy_data.portfolio.dict(),
+        "stop_loss_and_take_profit": backtest_strategy_data.stop_loss_and_take_profit.dict()
+    }
     # INFO - Create Portfolio
     # global portfolio
     portfolio = Portfolio(
-        initial_value=backtest_strategy_data.initial_portfolio_value,
+        initial_value=backtest_strategy_data.portfolio.initial_portfolio_value,
         starting_date=underlying_timeseries["Date"][strategy.amount_of_data_for_strategy_from_today(
         )],
         # starting_date=financial_data.iloc[strategy.amount_of_data_for_strategy_from_today(
         # )-1, :]["Date"],
-        strategy=strategy
+        strategy=strategy,
+        options=options
     )
 
     # INFO - Backtest
@@ -72,6 +77,7 @@ def backtest_strategy(backtest_strategy_data: Backtest_strategy_model):
     drawdown = drawdown_indicator(
         portfolio.value_history["total_portfolio_value"])
 
+    print(portfolio.value_history)
     percentage_return_ann = percentage_return_annualized(
         portfolio.value_history["liquidity"])
     payload = {
