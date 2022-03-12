@@ -7,17 +7,19 @@ def orders_amount_for_types(orders):
 
     amount_short_orders = len(orders.loc[orders["position"] == Position.SHORT])
 
+    positive_pnl_orders_filter = orders["PnL"] > 0
     amount_profitable_long_orders = len(orders[
         (orders["position"] == Position.LONG) &
-        (orders["close_price"] > orders["open_price"])])
+        positive_pnl_orders_filter])
 
     amount_profitable_short_orders = len(orders[
         (orders["position"] == Position.SHORT) &
-        (orders["close_price"] < orders["open_price"])])
+        positive_pnl_orders_filter])
 
     return {
         "general": {
             "amount": total_orders,
+            "percentage_profitable": (amount_profitable_long_orders + amount_profitable_short_orders)/total_orders
         },
         "long_orders": {
             "amount": amount_long_orders,

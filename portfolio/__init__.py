@@ -10,6 +10,7 @@ log = Logger("Backtester Engine", "purple")
 class Portfolio(ABC):
     def __init__(self, initial_value, starting_date, strategy, options):
         self.options = options
+        self.initial_value = initial_value
         self.value_history = pd.DataFrame(
             data={
                 "date": [starting_date],
@@ -63,22 +64,20 @@ class Portfolio(ABC):
 
         self.orders.loc[open_orders_filter, "value"] = today_price * \
             self.orders.loc[open_orders_filter, "size"]
-        # TODO - write PnL
-        ''' PNL
+
+        # INFO - Calculate PnL for each order
         # INFO - get open orders (Short and Long) and calculate their P&L using the today_price and their opening price
-        open_orders_filter = self.orders["status"] == Order_Status.OPEN
         long_orders_filter = self.orders["position"] == Position.LONG
         short_orders_filter = self.orders["position"] == Position.SHORT
 
-        # INFO - Long & Open Positions - Long Valuation: S_t-S_0
-        self.orders.loc[open_orders_filter & long_orders_filter, "value"] = today_price - \
-            self.orders.loc[open_orders_filter &
-                            long_orders_filter, "open_price"]
-
-        # INFO - Short & Open Positions - Short Valuation: S_0-S_t
-        self.orders.loc[open_orders_filter & short_orders_filter,
-                        "value"] = self.orders.loc[open_orders_filter & short_orders_filter, "open_price"] - today_price
-        '''
+        # INFO - Long & Open Positions - Long Valuation: (S_t-S_0)*Size
+        self.orders.loc[open_orders_filter & long_orders_filter, "PnL"] = (today_price -
+                                                                           self.orders.loc[open_orders_filter &
+                                                                                           long_orders_filter, "open_price"])*self.orders.loc[open_orders_filter &
+                                                                                                                                              long_orders_filter, "size"]
+        # INFO - Short & Open Positions - Short Valuation: (S_0-S_t)*size
+        self.orders.loc[open_orders_filter & short_orders_filter, "PnL"] = (
+            self.orders.loc[open_orders_filter & short_orders_filter, "open_price"] - today_price)*self.orders.loc[open_orders_filter & short_orders_filter, "size"]
 
     def update_portfolio_assets_value(self, today_date):
         # INFO - Update the value history
@@ -122,8 +121,8 @@ class Portfolio(ABC):
         order_size_type = self.options["portfolio"]["order_size_type"]
         order_size_amount = self.options["portfolio"]["order_size_amount"]
         if order_size_type == "absolute_value":
-            size = order_size_amount
-            final_order_price = size*creation_price
+            size = order_size_amount/creation_price
+            final_order_price = order_size_amount
         elif order_size_type == "percentage":
             final_order_price = self.total_portfolio_value(
             )*order_size_amount

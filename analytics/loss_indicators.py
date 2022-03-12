@@ -64,6 +64,7 @@ def drawdown_indicator(data):
         # "high_water_mark": high_water_mark,
         # "drawdown_duration": drawdown_duration,
         "values": drawdown,
+        "mean_drawdown": np.mean(drawdown),
         "max_drawdown": max_drawdown,
         "max_duration": max_duration,
         "duration_of_max_drawdown": duration_of_max_drawdown,
@@ -78,6 +79,7 @@ def underwater_indicator(data):
     underwater_infos = drawdown_indicator(data)
     return {
         "values": underwater_infos["values"],
+        "mean_underwater": underwater_infos["mean_drawdown"],
         "max_underwater": underwater_infos["max_drawdown"],
         "max_duration": underwater_infos["max_duration"],
         "underwater_of_max_duration": underwater_infos["drawdown_of_max_duration"],

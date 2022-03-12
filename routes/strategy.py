@@ -6,7 +6,7 @@ import backtester_engine
 from strategies.strategies import generate_inputs, get_stategy_by_name
 from analytics import absolute_return_annualized, autocorrelation_function, partial_autocorrelation_function, absolute_return_over_period, percentage_return_over_period, volatility_over_period, absolute_return_annualized, percentage_return_annualized, volatility_annualized
 from analytics.orders import orders_amount_for_types
-from analytics.performance import sharpe_ratio_annualized, sortino_ratio_annualized, calmar_ratio_annualized
+from analytics.performance import sharpe_ratio_annualized, sortino_ratio_annualized, calmar_ratio_annualized, correlation_with_benchmark, kestner_ratio, beta
 from analytics.loss_indicators import drawdown_indicator, underwater_indicator
 from auxiliaries.enumerations import get_position_restriction
 import numpy as np
@@ -92,7 +92,8 @@ def backtest_strategy(backtest_strategy_data: Backtest_strategy_model):
                 "volatility_over_period": volatility_over_period(portfolio.value_history["total_portfolio_value"]),
                 "volatility_annualized": volatility_annualized(portfolio.value_history["total_portfolio_value"]),
                 "drawdown": drawdown,
-                "underwater": underwater_indicator(portfolio.value_history["total_portfolio_value"])
+                "underwater": underwater_indicator(portfolio.value_history["total_portfolio_value"]),
+                "initial_value": portfolio.initial_value,
             },
             "benchmark": {
                 "returns": benchmark_timeseries["Adj Close"].pct_change().fillna("").to_list(),
@@ -121,7 +122,10 @@ def backtest_strategy(backtest_strategy_data: Backtest_strategy_model):
             "performance": {
                 "sharpe_ratio_annualized": sharpe_ratio_annualized(portfolio.value_history["total_portfolio_value"], backtest_strategy_data.risk_free_rate),
                 "sortino_ratio_annualized": sortino_ratio_annualized(portfolio.value_history["total_portfolio_value"], backtest_strategy_data.risk_free_rate),
-                "calmar_ratio_annualized": calmar_ratio_annualized(percentage_return_ann, drawdown["max_drawdown"])
+                "calmar_ratio_annualized": calmar_ratio_annualized(percentage_return_ann, drawdown["max_drawdown"]),
+                "correlation_with_benchmark": correlation_with_benchmark(portfolio.value_history["total_portfolio_value"], benchmark_timeseries["Adj Close"]),
+                "kestner_ratio": kestner_ratio(portfolio.value_history["total_portfolio_value"]),
+                "beta": beta(portfolio.value_history["total_portfolio_value"], benchmark_timeseries["Adj Close"]),
             }
         },
         "raw_data": {
