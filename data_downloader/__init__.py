@@ -14,9 +14,9 @@ logger = Logger("Data Downloader", "magenta")
 
 def download_financial_data(financial_instrument_name, start_date, end_date, timeframe, provider):
     start_date_dt = datetime.fromtimestamp(
-        float(start_date)/1000).strftime('%d/%m/%Y %H:%M:%S')
+        float(start_date)/1000)
     end_date_dt = dt.datetime.fromtimestamp(
-        float(end_date)/1000).strftime('%d/%m/%Y %H:%M:%S')
+        float(end_date)/1000)
     df = web.DataReader(
         financial_instrument_name,
         provider,

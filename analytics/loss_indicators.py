@@ -55,7 +55,7 @@ def drawdown_indicator(data):
 
     max_drawdown = min(drawdown)  # INFO - MAX drawdown
     # INFO - Duration MAX drawdown
-    duration_of_max_drawdown = max_drawdown_relative_index-1
+    duration_of_max_drawdown = max_drawdown_relative_index
 
     # INFO - Drawdown of the max duration
     drawdown_of_max_duration = min(k)  # if len(k) > 0 else 0
