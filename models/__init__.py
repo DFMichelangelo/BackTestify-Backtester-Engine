@@ -3,12 +3,6 @@ from pydantic import BaseModel
 from typing import Literal
 
 
-class Input_data_model(BaseModel):
-    timeframe: str
-    financial_instrument_name: str
-    #provider: str
-
-
 class Portfolio_model(BaseModel):
     initial_portfolio_value: float
     order_size_type: Literal['percentage', 'absolute_value']
@@ -28,7 +22,8 @@ class Backtest_strategy_model(BaseModel):
     start_date: str
     end_date: str
     strategy_name: str
-    input_data: Input_data_model
+    timeframe: str
+    financial_instrument_name: str
     portfolio: Portfolio_model
     stop_loss_and_take_profit: Stop_loss_and_take_profit_model
     orders_positions_limitations: Literal["no_limitations",

@@ -12,8 +12,8 @@ logger = Logger("Backtest Routes", "#4287f5")
 
 @router.get("/all")
 def get_backtests():
-    a = backtest_repository.get_all()
-    return a
+    result = backtest_repository.get_all()
+    return result
 
 
 @router.post("/")
@@ -21,6 +21,7 @@ def save_backtest(save_backtest_data: Backtest_save_model):
     return backtest_repository.create_one(save_backtest_data.dict())
 
 
+'''
 @router.get("/{id}")
 def get_backtest():
     pass
@@ -29,3 +30,4 @@ def get_backtest():
 @router.delete("/{id}")
 def delete_backtest():
     pass
+'''

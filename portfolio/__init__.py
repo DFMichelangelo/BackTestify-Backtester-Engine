@@ -3,8 +3,11 @@ import uuid
 from auxiliaries.enumerations import Order_Status, Order_Type, Position
 from logger import Logger
 from abc import ABC
+import time
 
 log = Logger("Backtester Engine", "purple")
+
+timer_logger = Logger("Timer", "#C89F9C")
 
 
 class Portfolio(ABC):

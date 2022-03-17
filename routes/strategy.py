@@ -9,19 +9,24 @@ from analytics.orders import orders_amount_for_types
 from analytics.performance import sharpe_ratio_annualized, sortino_ratio_annualized, calmar_ratio_annualized, correlation_with_benchmark, kestner_ratio, beta
 from analytics.loss_indicators import drawdown_indicator, underwater_indicator
 from auxiliaries.enumerations import get_position_restriction
+from logger import Logger
+import time
 import numpy as np
 
 router = APIRouter()
+
+timer_logger = Logger("Timer", "#C97C5D")
 
 
 @router.post("/backtest_strategy")
 def backtest_strategy(backtest_strategy_data: Backtest_strategy_model):
     # INFO - Download Data
+    t0 = time.perf_counter()
     underlying_timeseries = download_financial_data(
-        backtest_strategy_data.input_data.financial_instrument_name,
+        backtest_strategy_data.financial_instrument_name,
         backtest_strategy_data.start_date,
         backtest_strategy_data.end_date,
-        backtest_strategy_data.input_data.timeframe,
+        backtest_strategy_data.timeframe,
         "yahoo"  # backtest_strategy_data.input_data.provider
     )
 
@@ -29,10 +34,11 @@ def backtest_strategy(backtest_strategy_data: Backtest_strategy_model):
         backtest_strategy_data.benchmark_financial_instrument_name,
         backtest_strategy_data.start_date,
         backtest_strategy_data.end_date,
-        backtest_strategy_data.input_data.timeframe,
+        backtest_strategy_data.timeframe,
         "yahoo"  # backtest_strategy_data.input_data.provider
     )
-
+    t1 = time.perf_counter()
+    timer_logger.info(f"Downloaded data in {t1-t0} seconds")
     # INFO - Get Stategy
     strategy_class = get_stategy_by_name(
         backtest_strategy_data.strategy_name)
@@ -59,12 +65,16 @@ def backtest_strategy(backtest_strategy_data: Backtest_strategy_model):
         options=options
     )
 
+    t0 = time.perf_counter()
     # INFO - Backtest
     portfolio, backtest_info = backtester_engine.backtest_strategy(
         portfolio,
         underlying_timeseries
     )
 
+    t1 = time.perf_counter()
+    timer_logger.info(f"Backtested in {t1-t0} seconds")
+    t0 = time.perf_counter()
     prices_distribution = np.histogram(
         benchmark_timeseries["Adj Close"].to_list(), bins=50)
 
@@ -138,6 +148,8 @@ def backtest_strategy(backtest_strategy_data: Backtest_strategy_model):
         "amount_of_data_for_strategy_from_today": strategy.amount_of_data_for_strategy_from_today(),
     }
 
+    t1 = time.perf_counter()
+    timer_logger.info(f"Created Payload in {t1-t0} seconds")
     return payload
 
 

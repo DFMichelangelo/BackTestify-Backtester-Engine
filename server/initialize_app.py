@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI, status
-from routes import backtest, strategy
+from routes import backtest, strategy, optimization
 from logger.std_logger import init_std_logger
 from logger import Logger
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -28,6 +28,10 @@ app.include_router(
 app.include_router(
     strategy.router,
     tags=["Strategy"])
+app.include_router(
+    optimization.router,
+    prefix="/optimization",
+    tags=["Optimization"])
 
 
 # INFO - Validation Error Exception Handler

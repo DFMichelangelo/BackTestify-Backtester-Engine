@@ -100,7 +100,7 @@ def backtest_strategy(portfolio, financial_data):
             # INFO - open new order
             if portfolio.options["orders_positions_limitations"] != Position_Restrictions.NO_LIMITATIONS:
                 continue
-            if portfolio.options.open_new_order_on_contrarian_signal:
+            if portfolio.options["open_new_order_on_contrarian_signal"]:
                 order_created = portfolio.create_order(
                     open_price=today_price,
                     open_date=today_date,
